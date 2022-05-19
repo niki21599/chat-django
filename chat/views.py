@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.models import User
+from django.core import serializers
 
 # Create your views here.
 @login_required(login_url="/login/")
@@ -14,7 +15,9 @@ def index(request):
     if request.method == "POST":
         request.POST["textmessage"]
         myChat = Chat.objects.get(id=1)
-        Message.objects.create(text=request.POST["textmessage"], chat=myChat, author=request.user, receiver=request.user)
+        new_Message = Message.objects.create(text=request.POST["textmessage"], chat=myChat, author=request.user, receiver=request.user)
+        new_Message_Json = serializers.serialize("json", [new_Message])
+        return JsonResponse(new_Message_Json[1:-1], safe=False)
     chatMessages = Message.objects.filter(chat__id = 1)
 
     return render(request, "chat/index.html", {"messages": chatMessages})

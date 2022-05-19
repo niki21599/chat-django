@@ -3,6 +3,10 @@
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
 <style>
+    #temporaryMessage {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    
     .page-content {
         padding: 50px;
     }
@@ -65,6 +69,65 @@
     }
 </style>
 
+<script>
+    let sendMessage = async(e) => {
+        e.preventDefault()
+        let form = new FormData();
+        form.append("csrfmiddlewaretoken", "{{csrf_token}}")
+        form.append("textmessage", messageField.value)
+
+        let date = getDate()
+
+        chatContainer.innerHTML += `
+                <div id="temporaryMessage" class="messageContainer right">
+                    <div class="author blue">{{request.user.first_name}}</div>
+                    <div class="messageBody">
+                        <div class="message">${messageField.value}</div>
+                        <div class="date"> ${date}</div>
+                    </div>
+
+
+                </div>
+`
+        try {
+            let response = await fetch("/chat/", {
+                method: "POST",
+                body: form
+            })
+            let json = await response.json()
+            temporaryMessage.remove()
+            chatContainer.innerHTML += `
+                <div class="messageContainer right">
+                    <div class="author blue">{{request.user.first_name}}</div>
+                    <div class="messageBody">
+                        <div class="message">${messageField.value}</div>
+                        <div class="date"> ${date}</div>
+                    </div>
+
+
+                </div>
+`
+
+        } catch (error) {
+            console.error("An error occured: ", error)
+        }
+
+
+    }
+
+    function getDate() {
+        let today = new Date()
+
+        let day = String(today.getDate()).padStart(2, '0');
+        let month = String(today.getMonth() + 1).padStart(2, '0')
+        let year = today.getFullYear();
+        let monthWritten = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ][month - 1]
+        return `${monthWritten} ${day}, ${year}`
+    }
+</script>
+
 <!-- Always shows a header, even in smaller screens. -->
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
     <header class="mdl-layout__header">
@@ -86,14 +149,8 @@
             <!-- Your content goes here -->
             {% if request.user.is_authenticated%}
 
-            <div class="chatContainer">
-                <div class="messageContainer">
+            <div class="chatContainer" id="chatContainer">
 
-
-
-
-
-                </div>
                 {%for message in messages%}
                 <!-- right = rechts " " = links -->
                 {% if request.user == message.author%}
@@ -101,7 +158,7 @@
                     <div class="author blue">{{message.author.first_name}}</div>
                     <div class="messageBody">
                         <div class="message">{{message.text}}</div>
-                        <div class="date"> 22:02</div>
+                        <div class="date"> {{message.created_at}}</div>
                     </div>
 
 
@@ -112,7 +169,7 @@
                     <div class="author yellow">{{message.author.first_name}}</div>
                     <div class="messageBody">
                         <div class="message">{{message.text}}</div>
-                        <div class="date"> 22:02</div>
+                        <div class="date"> {{message.created_at}}</div>
                     </div>
 
 
@@ -122,11 +179,11 @@
             </div>
 
 
-            <form action="/chat/" method="post" class="message-field">
+            <form onsubmit="sendMessage(event); " method="post" class="message-field">
                 {% csrf_token%}
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label textfield">
-                    <input class="mdl-textfield__input" type="text" name="textmessage" id="sample3">
-                    <label class="mdl-textfield__label" for="sample3">Text...</label>
+                    <input class="mdl-textfield__input" type="text" name="textmessage" id="messageField">
+                    <label class="mdl-textfield__label" for="messageField">Text...</label>
                 </div>
                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent ">
                     Send
