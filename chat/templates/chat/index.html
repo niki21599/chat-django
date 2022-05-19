@@ -16,6 +16,8 @@
         bottom: 0;
         left: 50px;
         right: 50px;
+        background-color: white;
+        margin: 0;
     }
     
     .textfield {
@@ -34,6 +36,7 @@
     .chatContainer {
         display: flex;
         flex-direction: column;
+        margin-bottom: 16px;
     }
     
     .right {
@@ -70,6 +73,10 @@
 </style>
 
 <script>
+    let scrollDown = () => {
+        let el = document.querySelector("#page")
+        el.scrollTop = el.scrollHeight
+    }
     let sendMessage = async(e) => {
         e.preventDefault()
         let form = new FormData();
@@ -107,7 +114,7 @@
 
                 </div>
 `
-
+            scrollDown()
         } catch (error) {
             console.error("An error occured: ", error)
         }
@@ -126,9 +133,12 @@
         ][month - 1]
         return `${monthWritten} ${day}, ${year}`
     }
+    window.onload = setTimeout(() => scrollDown(), 1);
 </script>
 
 <!-- Always shows a header, even in smaller screens. -->
+
+
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
     <header class="mdl-layout__header">
         <div class="mdl-layout__header-row" style="display: flex; justify-content: space-between;">
@@ -144,7 +154,7 @@
         </div>
     </header>
 
-    <main class="mdl-layout__content">
+    <main class="mdl-layout__content" id="page" onload="scrollDown()">
         <div class="page-content">
             <!-- Your content goes here -->
             {% if request.user.is_authenticated%}
@@ -186,8 +196,8 @@
                     <label class="mdl-textfield__label" for="messageField">Text...</label>
                 </div>
                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent ">
-                    Send
-                  </button>
+                            Send
+                          </button>
             </form>
             {%else%}
             <h1>Click here to <a href="/login">login</a></h1>

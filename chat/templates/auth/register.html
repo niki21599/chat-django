@@ -84,7 +84,7 @@
                         })
                         let json = await response.json()
                         if (json.success) {
-                            window.location.replace("http://127.0.0.1:8000/login/")
+                            window.location.replace("/login/")
                         } else {
                             wrongData.innerHTML = json.errorMessage
                             wrongData.classList.remove("d-none")

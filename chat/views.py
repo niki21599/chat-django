@@ -8,6 +8,7 @@ from django.contrib.auth import logout
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.models import User
 from django.core import serializers
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 @login_required(login_url="/login/")
@@ -27,6 +28,7 @@ def index(request):
 
     return render(request, "chat/index.html", {"messages": chatMessages})
 
+@csrf_exempt
 def login_view(request):
     """
     This is the endpoint to login. 
@@ -44,6 +46,8 @@ def login_view(request):
     
     return render(request, "auth/login.html")
 
+
+@csrf_exempt
 def register(request):
     """
     This is the endpoint to create a new user. 
